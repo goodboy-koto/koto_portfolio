@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>マイ・自己分析ノート v17.0 Final</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- サイドバー -->
+    <div id="sidebar">
+        <div id="navigation-container">
+            <div id="page-list-container">
+                <h2>MyMind</h2>
+                <ul id="page-list"></ul>
+                <div class="btn-container">
+                <button id="add-page-btn">+</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- メインコンテンツ -->
+    <div id="main-content">
+        <div id="note-area">
+            <div id="canvas-content">
+                <svg id="drawing-canvas"></svg> 
+                <svg id="connector-canvas"></svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- フローティングUI要素 -->
+    <button id="menu-toggle-btn">☰</button>
+    
+    <div id="floating-toolbox">
+        <div class="toolbox-column">
+            <div id="toolbox-drag-handle"></div>
+            <button id="arrow-tool-btn" title="矢印を作成">➔</button>
+            <button id="text-link-tool-btn" title="テキストから接続">○</button>
+            <button id="multi-arrow-tool-btn" title="複数矢印を作成">⇶</button>
+            <button id="draw-tool-btn" title="描画ツール">✎</button>
+            <button id="add-image-btn" title="写真を追加">🖼️</button>
+            <button id="sticker-tool-btn" title="絵文字を追加">😊</button>
+        </div>
+        <div class="toolbox-column">
+            <button id="toggle-memo-btn" title="メモの表示切替">🗒️</button> 
+            <div class="color-dropdown">
+                <button id="line-color-btn" class="color-dropdown-button" title="線の色">〰</button>
+                <div id="line-color-palette" class="color-palette hidden"></div>
+            </div>
+            <button id="border-tool-btn" title="枠線モード">□</button>
+            <button id="bg-color-btn" title="背景色モード">■</button>
+            <button id="eraser-tool-btn" title="消しゴム">⌫</button>
+            <button id="focus-mode-btn" title="フォーカスモード">◎</button>
+            <button id="zoom-in-btn" title="拡大">+</button>
+            <button id="zoom-out-btn" title="縮小">-</button>
+            <button id="fit-to-screen-btn" title="全体表示">⛶</button>
+        </div>
+    </div>
+
+    <!-- インラインツールボックス（JSで動的に生成・制御） -->
+    <div id="inline-toolbox" class="hidden"></div>
+    
+    <!-- リンクスタイル用ツールボックス -->
+    <div id="link-toolbox" class="hidden">
+        <button data-style="solid" title="標準線">─</button>
+        <button data-style="dashed" title="破線">┄</button>
+        <button data-style="thick" title="太線">━</button>
+        <!-- ★ 変更: 「細線」ボタンを追加し、「二重線」ボタンを削除 -->
+        <button data-style="thin" title="細線">–</button>
+    </div>
+
+    <div id="drawing-toolbox" class="hidden">
+        <div class="tool-group">
+            <button class="draw-tool active" data-tool="freehand" title="ペン">✍</button>
+            <button class="draw-tool" data-tool="lasso-fill" title="投げなわ塗り">⬚</button>
+            <button class="draw-tool" data-tool="ellipse" title="円/楕円">○</button>
+            <button class="draw-tool" data-tool="rectangle" title="四角形">▭</button>
+            <button class="draw-tool" data-tool="eraser" title="消しゴム">⌫</button>
+        </div>
+        <div class="divider"></div>
+        <div class="tool-group">
+            <label>ペン:</label>
+            <div class="color-dropdown">
+                <button id="draw-color-btn" class="color-dropdown-button" title="ペンの色"></button>
+                <div id="draw-color-palette" class="color-palette hidden"></div>
+            </div>
+            <input type="range" id="draw-stroke-width-picker" class="draw-style-picker" data-property="strokeWidth" min="1" max="50" value="3" title="ペンの太さ">
+        </div>
+        <div class="divider"></div>
+        <div class="tool-group">
+            <label>塗り:</label>
+            <button class="fill-pattern-btn active" data-fill-type="solid" title="塗りつぶし">■</button>
+            <button class="fill-pattern-btn" data-fill-type="stripes" title="斜線"> stripes</button>
+            <button class="fill-pattern-btn" data-fill-type="dots" title="水玉">dots</button>
+        </div>
+        <div class="divider"></div>
+        <div class="tool-group">
+            <label for="draw-opacity-picker">不透明度:</label>
+            <input type="range" id="draw-opacity-picker" class="draw-style-picker" data-property="opacity" min="0" max="1" value="1" step="0.05" title="不透明度">
+        </div>
+    </div>
+
+    <div id="sticker-toolbox" class="hidden">
+        <div id="sticker-options"></div>
+    </div>
+
+    <!-- 写真アップロード用の非表示インプット -->
+    <input type="file" id="image-input" class="hidden" accept="image/*">
+
+    <!-- 複数矢印作成モーダル -->
+    <div id="modal-overlay" class="hidden">
+        <div id="multiple-arrow-modal">
+            <h3>複数項目の入力</h3>
+            <p>各項目を改行で区切って入力してください。</p>
+            <textarea id="multiple-arrow-textarea" rows="8"></textarea>
+            <div class="modal-buttons">
+                <button id="cancel-multi-arrow-btn">キャンセル</button>
+                <button id="create-multi-arrow-btn">作成</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="memo-container" class="hidden"></div>
+
+    <div id="stats-panel" class="hidden">
+        <div id="stats-content">
+            <p>総項目数: <span id="total-items-stat">0</span></p>
+            <p>今日の追加: <span id="today-items-stat">0</span></p>
+            <p>思考の長さ: <span id="total-length-stat">0.0</span> cm</p>
+            <p>(例えるなら: <span id="length-comparison-stat">...</span>)</p>
+        </div>
+    </div>
+    
+    <button id="stats-toggle-btn" title="統計">📊</button>
+     <div id="save-status"></div>
+
+    <div id="focus-overlay" class="hidden"></div>
+
+     <script type="module" src="script.js"></script>
+</body>
+</html>

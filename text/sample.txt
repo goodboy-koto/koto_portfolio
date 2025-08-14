@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <title>拡張機能テスト</title>
+</head>
+
+<body>
+  <h1>拡張機能をテストします。</h1>
+  <p>プラウザで表示を確認します。</p>
+</body>
+
+</html>
